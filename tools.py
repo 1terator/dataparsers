@@ -12,13 +12,13 @@ from urllib3.exceptions import LocationParseError
 async def parsing_emails_from_website(url: str) -> List:
     print(f"Parse Website email {url}")
     try:
-        request: Response = await asyncio.to_thread(requests.get, url=url)
+        request: Response = await asyncio.to_thread(requests.get, url=url, timeout=3)
     except Exception as exc:
         print(exc)
         return []
     print(f"Stop Parse Website {url}")
     soup = BeautifulSoup(request.content, "lxml")
-    email_pattern = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,4}")
+    email_pattern = re.compile(r"([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})")
     return list(set(re.findall(email_pattern, soup.get_text()))) if request.status_code == 200 else []
 
 
@@ -30,7 +30,7 @@ async def parsing_phone_numbers_from_website(url: str) -> List:
         return []
     print(f"Stop Parse Website {url}")
     soup = BeautifulSoup(request.content, "lxml")
-    phone_pattern = re.compile(r"([+]\w{13,20})")
+    phone_pattern = re.compile(r"\+?\d{1,3}\s?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{2}[-.\s]?\d{2}")
     return list(set(re.findall(phone_pattern, soup.get_text()))) if request.status_code == 200 else []
 
 
